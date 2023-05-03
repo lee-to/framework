@@ -14,7 +14,7 @@ class FoundationDocsCommandTest extends TestCase
     /**
      * The URL opened by the command.
      *
-     * @var ?string
+     * @var string|null
      */
     protected $openedUrl;
 
@@ -292,7 +292,7 @@ Working directory: expected-working-directory');
         $this->app[Kernel::class]->registerCommand($this->command()->setUrlOpener(null)->setSystemOsFamily('Laravel OS'));
 
         $this->artisan('docs validation')
-            ->expectsOutputToContain('Unable to open the URL on your system. You will need to open it yourself.')
+            ->expectsOutputToContain('Unable to open the URL on your system. You will need to open it yourself or create a custom opener for your system.')
             ->assertSuccessful();
     }
 
@@ -321,6 +321,12 @@ Working directory: expected-working-directory');
             ->assertSuccessful();
 
         $this->assertSame($this->openedUrl, 'https://laravel.com/docs/8.x');
+    }
+
+    public function testCanGetHelpWithoutInstantiatingDependencies()
+    {
+        $help = (new DocsCommand())->getHelp();
+        $this->stringContains('php artisan docs', $help);
     }
 
     protected function command()

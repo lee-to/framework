@@ -14,6 +14,8 @@ class MigratorTest extends TestCase
      */
     private $output;
 
+    public $subject;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -31,6 +33,8 @@ class MigratorTest extends TestCase
         $this->expectTask('2014_10_12_000000_create_people_table', 'DONE');
         $this->expectTask('2015_10_04_000000_modify_people_table', 'DONE');
         $this->expectTask('2016_10_04_000000_modify_people_table', 'DONE');
+
+        $this->output->shouldReceive('writeln')->once();
 
         $this->subject->run([__DIR__.'/fixtures']);
 
@@ -58,11 +62,13 @@ class MigratorTest extends TestCase
         $this->subject->getRepository()->log('2015_10_04_000000_modify_people_table', 1);
         $this->subject->getRepository()->log('2016_10_04_000000_modify_people_table', 1);
 
-        $this->expectInfo('Rollbacking migrations.');
+        $this->expectInfo('Rolling back migrations.');
 
         $this->expectTask('2016_10_04_000000_modify_people_table', 'DONE');
         $this->expectTask('2015_10_04_000000_modify_people_table', 'DONE');
         $this->expectTask('2014_10_12_000000_create_people_table', 'DONE');
+
+        $this->output->shouldReceive('writeln')->once();
 
         $this->subject->rollback([__DIR__.'/fixtures']);
 
@@ -84,6 +90,8 @@ class MigratorTest extends TestCase
 
         $this->expectTwoColumnDetail('2016_10_04_000000_modify_people_table');
         $this->expectBulletList(['alter table "people" add column "last_name" varchar']);
+
+        $this->output->shouldReceive('writeln')->once();
 
         $this->subject->run([__DIR__.'/fixtures'], ['pretend' => true]);
 
